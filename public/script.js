@@ -33,7 +33,6 @@ function loadVoices() {
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
 
-
 //Translate text with serverless function
 async function translateText(text, targetLang) {
     try {
@@ -57,13 +56,34 @@ async function translateText(text, targetLang) {
     }
 };
 
-
-// Play TTS
-playButton.addEventListener('click', () => {
-    const utterance = new SpeechSynthesisUtterance(textInput.value);
-    const selectedVoice = voices[voiceSelect.value];
-    if (selectedVoice) {
-        utterance.voice = selectedVoice;
+// TTS
+function playText(text, voiceIndex) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (voices[voiceIndex]) {
+        utterance.voice = voices[voiceIndex];
     }
     speechSynthesis.speak(utterance);
+}
+
+
+// Play TTS
+playButton.addEventListener('click', async () => {
+    const text = textInput.value.trim();
+    const targetLang = languageSelect.value;
+    const selectedVoiceIndex = voiceSelect.value;
+
+    if (!text) {
+        alert('Please enter text to translate.');
+        return;
+    }
+
+    try {
+        // Translate Text
+        const translatedText = await translateText(text, targetLang);
+        // Play Text 
+        playText(translatedText, selectedVoiceIndex);
+    } catch (error) {
+        console.error('Error during processing: ', error);
+        alert('Failed to play text.');
+    }
 });
